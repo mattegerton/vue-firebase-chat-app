@@ -3,11 +3,12 @@
     <h2 class="center teal-text">Vue-Chat</h2>
     <div class="card">
       <div class="card-content">
+        <p class="red-text nomessages" v-if="messages.length == 0">There are no messages to display</p>
         <ul class="messages">
-          <li>
-            <span class="teal-text name">Matt</span>
-            <span class="grey-text text-darken-3">What time shall we meet tomorrow?</span>
-            <span class="grey-text time">13:31</span>
+          <li v-for="message in messages" :key="message.id">
+            <span class="teal-text name">{{ message.user }}</span>
+            <span class="grey-text text-darken-3">{{ message.message }}</span>
+            <span class="grey-text time">{{ message.timestamp }}</span>
           </li>
         </ul>
       </div>
@@ -20,6 +21,9 @@
 
 <script>
 import NewMessage from "@/components/NewMessage.vue";
+import fb from "@/firebase/init.js";
+import moment from "moment";
+
 export default {
   name: "Chat",
   props: ["name"],
@@ -27,7 +31,27 @@ export default {
     NewMessage
   },
   data() {
-    return {};
+    return {
+      messages: []
+    };
+  },
+  created() {
+    let ref = fb.collection("messages").orderBy("timestamp");
+    ref.onSnapshot(snapshot => {
+      snapshot.docChanges().forEach(change => {
+        if (change.type === "added") {
+          let doc = change.doc;
+          console.log(doc);
+          let newMessage = {
+            id: doc.id,
+            user: doc.data().user,
+            message: doc.data().message,
+            timestamp: moment(doc.data().timestamp).format("LTS")
+          };
+          this.messages = [...this.messages, newMessage];
+        }
+      });
+    });
   }
 };
 </script>
