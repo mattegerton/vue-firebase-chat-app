@@ -13,7 +13,7 @@
         </ul>
       </div>
       <div class="card-action">
-        <NewMessage/>
+        <NewMessage v-bind:name="this.name"/>
       </div>
     </div>
   </div>
@@ -21,7 +21,7 @@
 
 <script>
 import NewMessage from "@/components/NewMessage.vue";
-import fb from "@/firebase/init.js";
+import fb from "@/firebase/init";
 import moment from "moment";
 
 export default {
@@ -36,18 +36,18 @@ export default {
     };
   },
   created() {
-    let ref = fb.collection("messages").orderBy("timestamp");
+    let ref = fb.collection("messages").orderBy("timestampe");
     ref.onSnapshot(snapshot => {
       snapshot.docChanges().forEach(change => {
         if (change.type === "added") {
           let doc = change.doc;
           let newMessage = {
             id: doc.id,
-            user: doc.data().user,
+            user: doc.data().name,
             message: doc.data().message,
             timestamp: moment(doc.data().timestamp).format("LTS")
           };
-          this.messages = [...this.messages, newMessage];
+          this.messages.push(newMessage);
         }
       });
     });
@@ -63,13 +63,16 @@ export default {
 
 .chat {
   text-align: left;
+  overflow: hidden;
 }
 
 .chat li {
   background: rgb(240, 240, 240);
-  padding: 1em;
+  padding: 1.5em;
+  margin: 0.5em;
+  width: 70%;
   padding-left: 40px;
-  border-radius: 50px;
+  word-wrap: break-word;
 }
 
 .chat span {
@@ -80,8 +83,8 @@ export default {
 
 .chat .time {
   display: block;
-  float: right;
   padding-right: 3em;
+  font-size: 1em;
 }
 
 .chat .name {
