@@ -41,7 +41,6 @@ export default {
       snapshot.docChanges().forEach(change => {
         if (change.type === "added") {
           let doc = change.doc;
-          console.log(doc);
           let newMessage = {
             id: doc.id,
             user: doc.data().user,
